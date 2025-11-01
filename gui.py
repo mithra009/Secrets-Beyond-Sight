@@ -46,7 +46,7 @@ class SteganographyApp:
         self.notebook.add(self.embed_tab, text="Embed Message")
         self.notebook.add(self.extract_tab, text="Extract Message")
         self.notebook.add(self.analysis_tab, text="Analysis")
-        self.notebook.add(self.testing_tab, text="🧪 Testing Lab")
+        self.notebook.add(self.testing_tab, text="Testing Lab")
         self.notebook.add(self.info_tab, text="About")
         
         # Setup each tab
@@ -363,7 +363,7 @@ class SteganographyApp:
         main_frame.pack(fill='both', expand=True)
         
         # Title
-        title_label = ttk.Label(main_frame, text="🧪 Testing Lab: Standard LSB vs DP-Enhanced LSB", 
+        title_label = ttk.Label(main_frame, text="Testing Lab: Standard LSB vs DP-Enhanced LSB", 
                                font=('Arial', 14, 'bold'))
         title_label.pack(pady=(0, 20))
         
@@ -440,8 +440,8 @@ class SteganographyApp:
         # Run Test Button
         btn_frame = ttk.Frame(main_frame)
         btn_frame.pack(pady=20)
-        ttk.Button(btn_frame, text="▶ Run Complete Test", 
-                  command=self.run_comparison_test).pack()
+        ttk.Button(btn_frame, text="Run Complete Test", 
+          command=self.run_comparison_test).pack()
         
         # Results Section
         results_frame = ttk.LabelFrame(main_frame, text="2. Test Results", padding="10")
@@ -744,10 +744,10 @@ For your current parameters:
 
 DETECTION ANALYSIS - READ THIS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ Single-image Chi-Square tests CANNOT evaluate DP-steganography!
-✓ Use the "Compare Images" feature in the Analysis tab instead.
-✓ Compare the ORIGINAL cover image with this STEGO image.
-✓ Success is measured by HOW MUCH the distribution changed (< 1% = good).
+WARNING: Single-image Chi-Square tests CANNOT evaluate DP-steganography.
+Use the "Compare Images" feature in the Analysis tab instead.
+Compare the ORIGINAL cover image with this STEGO image.
+Success is measured by how much the distribution changed (< 1% = good).
 
 Stego image saved to:
 {result['save_path']}
@@ -904,7 +904,7 @@ Analysis complete for: {os.path.basename(self.analysis_image_path)}
             results_text = f"""
 MULTI-CHANNEL STEGANALYSIS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-⚠️ SINGLE-IMAGE TEST - LIMITED VALUE FOR DP-STEGANOGRAPHY
+WARNING: SINGLE-IMAGE TEST - LIMITED VALUE FOR DP-STEGANOGRAPHY
 
 RED CHANNEL:
   • Status: {result['red']['verdict']}
@@ -943,28 +943,27 @@ Analysis complete for: {os.path.basename(self.analysis_image_path)}
         if not hasattr(self, 'stego_comparison_path') or not self.stego_comparison_path:
             messagebox.showerror("Error", "Please select a stego image!")
             return
-            
         try:
             # Run comparison
             comparison = compare_images(self.original_comparison_path, self.stego_comparison_path)
             visual = calculate_visual_difference(self.original_comparison_path, self.stego_comparison_path)
-            
-            # Color indicators for effectiveness
+
+            # Indicators for effectiveness (plain labels)
             effectiveness = comparison['effectiveness']
-            color_indicator = {
-                'EXCELLENT': '🟢',
-                'GOOD': '🟢',
-                'FAIR': '🟡',
-                'POOR': '🔴'
-            }.get(effectiveness['rating'], '⚪')
-            
+            label_indicator = {
+                'EXCELLENT': '[EXCELLENT]',
+                'GOOD': '[GOOD]',
+                'FAIR': '[FAIR]',
+                'POOR': '[POOR]'
+            }.get(effectiveness['rating'], '[UNKNOWN]')
+
             results_text = f"""
 ════════════════════════════════════════════════
-  ✓ PROPER DP-STEGANOGRAPHY EVALUATION
+PROPER DP-STEGANOGRAPHY EVALUATION
 ════════════════════════════════════════════════
 
-{color_indicator} VERDICT: {effectiveness['verdict']}
-{color_indicator} EFFECTIVENESS: {effectiveness['rating']}
+{label_indicator} VERDICT: {effectiveness['verdict']}
+{label_indicator} EFFECTIVENESS: {effectiveness['rating']}
 
 {effectiveness['interpretation']}
 
@@ -994,25 +993,25 @@ Stego Image LSB Distribution:
   • Status:             {comparison['stego']['verdict']}
 
 CHANGE METRICS (Key Indicators):
-  • Deviation Change:   {comparison['changes']['deviation_change']:.4f}% ⬅ PRIMARY METRIC
+  • Deviation Change:   {comparison['changes']['deviation_change']:.4f}% (PRIMARY METRIC)
   • P-Value Change:     {comparison['changes']['p_value_change']:.6f}
   • Detection Changed:  {'Yes' if comparison['changes']['detection_changed'] else 'No'}
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 EFFECTIVENESS THRESHOLDS:
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-  🟢 EXCELLENT:  < 0.5% deviation change (virtually undetectable)
-  🟢 GOOD:       < 1.0% deviation change (well-hidden)
-  🟡 FAIR:       < 2.0% deviation change (moderate risk)
-  🔴 POOR:       ≥ 2.0% deviation change (high detection risk)
+  EXCELLENT:  < 0.5% deviation change (virtually undetectable)
+  GOOD:       < 1.0% deviation change (well-hidden)
+  FAIR:       < 2.0% deviation change (moderate risk)
+  POOR:       ≥ 2.0% deviation change (high detection risk)
 
 Visual Quality: PSNR > 40 dB = imperceptible
 This embedding: {visual['psnr']:.2f} dB - {visual['quality_rating']}
             """
-            
+
             self.analysis_results_text.delete('1.0', tk.END)
             self.analysis_results_text.insert('1.0', results_text)
-            
+
         except Exception as e:
             messagebox.showerror("Analysis Failed", str(e))
     
@@ -1057,7 +1056,7 @@ This embedding: {visual['psnr']:.2f} dB - {visual['quality_rating']}
             original_analysis = chi_square_attack(original_path, channel='all')
             
             self.testing_results_text.insert(tk.END, 
-                f"✓ Generated {width}×{height} image\n"
+                f"Generated {width}×{height} image\n"
                 f"  LSB Distribution: {original_analysis['lsb_0_percent']:.2f}% / {original_analysis['lsb_1_percent']:.2f}%\n"
                 f"  Deviation: {original_analysis['deviation_from_50_50']:.4f}%\n"
                 f"  Status: {original_analysis['verdict']}\n\n")
@@ -1071,7 +1070,7 @@ This embedding: {visual['psnr']:.2f} dB - {visual['quality_rating']}
             standard_analysis = chi_square_attack(standard_path, channel='all')
             
             self.testing_results_text.insert(tk.END,
-                f"✓ Embedded {len(message)} characters ({standard_result['message_length_bits']} bits)\n"
+                f"Embedded {len(message)} characters ({standard_result['message_length_bits']} bits)\n"
                 f"  Capacity Used: {standard_result['capacity_used_percent']:.2f}%\n"
                 f"  LSB Distribution: {standard_analysis['lsb_0_percent']:.2f}% / {standard_analysis['lsb_1_percent']:.2f}%\n"
                 f"  Deviation: {standard_analysis['deviation_from_50_50']:.4f}%\n"
@@ -1086,7 +1085,7 @@ This embedding: {visual['psnr']:.2f} dB - {visual['quality_rating']}
             dp_analysis = chi_square_attack(dp_path, channel='all')
             
             self.testing_results_text.insert(tk.END,
-                f"✓ Embedded {len(message)} characters ({dp_result['message_length_bits']} bits)\n"
+                f"Embedded {len(message)} characters ({dp_result['message_length_bits']} bits)\n"
                 f"  Noise Added: {dp_result['noise_added']} bits\n"
                 f"  Decoy Bits: {dp_result['decoy_pixels']} bits\n"
                 f"  Total Modified: {dp_result['total_pixels_modified']} bits\n"
@@ -1177,7 +1176,7 @@ DP-Enhanced LSB:     {dp_deviation_change:.4f}% deviation change ({dp_effectiven
 IMPROVEMENT:         {improvement:.1f}% reduction in detectability
 
 CONCLUSION:
-{'✓ DP-Enhanced method is MORE SECURE than standard LSB!' if dp_deviation_change < standard_deviation_change else '⚠ Unexpected result - DP should perform better'}
+{'DP-Enhanced method is MORE SECURE than standard LSB.' if dp_deviation_change < standard_deviation_change else 'Unexpected result - DP did not perform better as expected.'}
 
 Explanation:
 Standard LSB modifies pixels sequentially, creating detectable patterns.

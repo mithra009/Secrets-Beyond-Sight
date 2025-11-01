@@ -1,15 +1,16 @@
-﻿# Differential Privacy-Enhanced LSB Steganography: A Comparative Study
+﻿# Secrets Beyond Sight
+## Differential Privacy-Enhanced LSB Steganography: A Comparative Study
 
-**Authors:** [Your Name]  
-**Institution:** [Your Institution]  
+**Authors:** Mithravardhan P N  
+**Institution:** Indian Institute of Information Technology, Nagpur 
 **Date:** November 2025  
-**Course:** Distributed and Parallel Systems (Semester 5)
+**Course:** Data Privacy and Security
 
 ---
 
 ## Abstract
 
-This research presents a novel approach to digital steganography that integrates Differential Privacy (DP) mechanisms with traditional Least Significant Bit (LSB) embedding to provide mathematical guarantees against statistical steganalysis attacks. We demonstrate that by introducing calibrated Laplace noise and random decoy bits, our method achieves significantly lower detectability (0.3-0.5% deviation change) compared to standard sequential LSB steganography (5-10% deviation change), while maintaining visual imperceptibility (PSNR > 40 dB). The implementation includes a comprehensive testing framework that enables reproducible experimental validation, establishing this approach as a scientifically rigorous enhancement to classical steganography techniques.
+This case-study presents a novel approach to digital steganography that integrates Differential Privacy (DP) mechanisms with traditional Least Significant Bit (LSB) embedding to provide mathematical guarantees against statistical steganalysis attacks. We demonstrate that by introducing calibrated Laplace noise and random decoy bits, our method achieves significantly lower detectability (0.3-0.5% deviation change) compared to standard sequential LSB steganography (5-10% deviation change), while maintaining visual imperceptibility (PSNR > 40 dB). The implementation includes a comprehensive testing framework that enables reproducible experimental validation, establishing this approach as a scientifically rigorous enhancement to classical steganography techniques.
 
 **Keywords:** Steganography, Differential Privacy, LSB Embedding, Steganalysis, Chi-Square Test, Information Hiding
 
@@ -58,7 +59,7 @@ We implement a **Noisy Pixel Selection** algorithm that:
 - Uses cryptographic hashing (SHA-256) for deterministic pixel shuffling
 - Adds Laplace noise to message length (DP mechanism)
 - Embeds random decoy bits to restore LSB randomness
-- Achieves 85-95% reduction in statistical detectability vs. standard LSB
+- Achieves notable reduction in statistical detectability vs. standard LSB
 
 ---
 
@@ -309,12 +310,12 @@ case study/
 ### 5.1 Test Environment
 
 **Hardware:**
-- Processor: [Your Processor]
-- RAM: [Your RAM]
-- OS: Windows/Linux/macOS
+- Processor:13th Gen Intel(R) Core(TM) i7-13650HX 
+- RAM: 24 GB
+- OS: Windows
 
 **Software:**
-- Python: 3.8+
+- Python: 3.12
 - Libraries: NumPy 1.24.0, Pillow 10.0.0, SciPy 1.11.0
 
 ### 5.2 Test Dataset
@@ -404,7 +405,7 @@ python main.py
 
 ### Prerequisites
 
-- Python 3.8 or higher
+- Python 3.12 or higher
 - pip (Python package manager)
 
 ### Setup
@@ -462,7 +463,7 @@ python gui.py
    - Higher ε = Lower privacy (less noise)
 
 5. **Embed Message**
-   - Click "🔒 Embed Message"
+   - Click "Embed Message"
    - Choose where to save the stego image (must be PNG!)
    - Note the **message length in bits** (needed for extraction)
 
@@ -484,14 +485,14 @@ python gui.py
    - Example: 800 bits for a 100-character message
 
 4. **Extract Message**
-   - Click "🔓 Extract Message"
+   - Click "Extract Message"
    - View the extracted message
 
 ### Analyzing Images
 
 #### Chi-Square Test
 - Select an image in the "Analysis" tab
-- Click "🔬 Chi-Square Test"
+- Click "Chi-Square Test"
 - View p-value and detection verdict
 
 #### Multi-Channel Analysis
@@ -500,7 +501,7 @@ python gui.py
 
 #### Compare Original vs Stego
 - Select both original and stego images
-- Click "📊 Compare Images"
+- Click "Compare Images"
 - View statistical differences and PSNR metrics
 
 ---
@@ -599,8 +600,8 @@ H₁: Δdev₁ > Δdev₂ (DP provides benefit)
 
 **Critical Understanding:**
 
-❌ **WRONG:** "My stego image shows p < 0.05 → detected → failure"  
-✓ **CORRECT:** "Original also shows p < 0.05 → natural bias → compare change"
+ **WRONG:** "My stego image shows p < 0.05 → detected → failure"  
+ **CORRECT:** "Original also shows p < 0.05 → natural bias → compare change"
 
 **Example:**
 ```
@@ -623,7 +624,7 @@ Correct approach:
 ### 7.1 Installation
 
 **Prerequisites:**
-- Python 3.8 or higher
+- Python 3.12 or higher
 - pip package manager
 
 **Setup:**
@@ -649,14 +650,14 @@ python main.py
 ### 7.3 Using the Testing Lab (Recommended for Research)
 
 1. Launch application
-2. Navigate to **"🧪 Testing Lab"** tab
+2. Navigate to **"Testing Lab"** tab
 3. Configure parameters:
    - **Image Size:** 256×256 (smaller = more visible epsilon effects)
    - **Test Message:** [Your message]
    - **Epsilon:** 0.5 (recommended starting point)
    - **Password:** TestPassword123
    - **Random Seed:** 42 (for reproducibility)
-4. Click **"▶ Run Complete Test"**
+4. Click **"Run Complete Test"**
 5. Review comprehensive comparison report
 
 **Output includes:**
@@ -1106,8 +1107,8 @@ For questions or feedback about this educational project, please refer to your c
 
 **Version**: 1.0  
 **Last Updated**: November 2025  
-**Course**: Distributed Privacy Systems (DPS)  
-**Institution**: [Your Institution]
+**Course**: Data Privacy and Security  
+**Institution**: Indian Institute of Information Technology,Nagpur
 
 ---
 

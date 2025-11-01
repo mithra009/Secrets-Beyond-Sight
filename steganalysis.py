@@ -90,11 +90,11 @@ def chi_square_attack(image_path: str, channel: str = 'red') -> dict:
         explanation = (
             f"LSB distribution deviates {deviation:.2f}% from perfect randomness (50/50). "
             f"Current distribution: {actual_percent_0:.2f}% zeros / {actual_percent_1:.2f}% ones. "
-            "\n\n⚠️ CRITICAL WARNING: This result is NORMAL for natural photographs! "
+            "\n\nWARNING: This result is NORMAL for natural photographs. "
             "Real photos almost always have biased LSB distributions due to camera sensors, "
             "compression artifacts, and scene characteristics. "
-            "\n\n❌ THIS TEST CANNOT determine if a hidden message exists! "
-            "\n✓ To properly evaluate DP-steganography, use the 'Compare Images' feature "
+            "\n\nNOTE: This test CANNOT determine if a hidden message exists. "
+            "\nNote: To properly evaluate DP-steganography, use the 'Compare Images' feature "
             "to analyze how much the distribution changed from original to stego image."
         )
     else:
@@ -103,11 +103,11 @@ def chi_square_attack(image_path: str, channel: str = 'red') -> dict:
         explanation = (
             f"LSB distribution is close to random (50/50), with only {deviation:.2f}% deviation. "
             f"Current distribution: {actual_percent_0:.2f}% zeros / {actual_percent_1:.2f}% ones. "
-            "\n\n⚠️ IMPORTANT: This result is RARE for natural photographs! "
+            "\n\nIMPORTANT: This result is RARE for natural photographs. "
             "This suggests either: (1) synthetic/noise image, (2) previous randomization, "
             "or (3) extremely uniform scene. "
-            "\n\n❌ THIS TEST STILL CANNOT determine if a message exists! "
-            "\n✓ Use 'Compare Images' for proper steganographic analysis."
+            "\n\nNOTE: This test STILL CANNOT determine if a message exists. "
+            "\nNote: Use 'Compare Images' for proper steganographic analysis."
         )
     
     return {
@@ -131,7 +131,7 @@ def compare_images(original_path: str, stego_path: str) -> dict:
     """
     Compare LSB statistics between original and stego images.
     
-    ✓ THIS IS THE PROPER TEST FOR DP-ENHANCED STEGANOGRAPHY!
+    NOTE: This is the proper test for DP-ENHANCED steganography.
     
     Single-image tests are invalid because:
     - Natural photos always have biased LSBs (show "DETECTED")
