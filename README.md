@@ -253,7 +253,10 @@ Algorithm 2: Message Extraction
 ┌─────────────────────────────────────────────────────────┐
 │                    GUI Layer (tkinter)                   │
 │  • Embedding Interface    • Analysis Interface           │
-│  • Extraction Interface   • Testing Lab                  │
+│  • Extraction Interface   • Testing Lab (Enhanced)       │
+│    - Synthetic image generation with seed                │
+│    - Existing image file testing                         │
+│    - PSNR/MSE quality metrics                            │
 └────────────────┬────────────────────────────────────────┘
                  │
 ┌────────────────▼────────────────────────────────────────┐
@@ -266,7 +269,8 @@ Algorithm 2: Message Extraction
 │              Utilities & Analysis Layer                  │
 │  • password_to_seed()   • chi_square_attack()            │
 │  • string_to_bits()     • compare_images()               │
-│  • get_pixel_indices()  • generate_random_lsb_image()    │
+│  • get_pixel_indices()  • calculate_visual_difference()  │
+│  • generate_random_lsb_image()  • calculate_epsilon_...  │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -353,21 +357,29 @@ python main.py
 # 3. Navigate to "Testing Lab" tab
 
 # 4. Set parameters:
-#    - Image Size: 256×256
+#    - Image Source: Synthetic (use seed)  OR  Existing Image File
+#    - Image Size: 256×256 (for synthetic)
 #    - Message: [Standard test message]
 #    - Epsilon: 0.5
 #    - Password: TestPassword123
-#    - Seed: 42
+#    - Seed: 42 (for synthetic images)
 
-# 5. Click "Run Complete Test"
+# 5. Optional: If using existing image, click "Browse Image for Test"
 
-# 6. Record results from output
+# 6. Click "Run Complete Test"
+
+# 7. Review comprehensive output including:
+#    - Statistical metrics (deviation change)
+#    - Visual quality (PSNR, MSE)
+#    - Effectiveness ratings
 ```
 
 **Expected Results (ε=0.5, 256×256, seed=42):**
 - Standard LSB deviation change: ~5-8%
 - DP-Enhanced deviation change: ~0.3-0.5%
-- Improvement: ~90-95%
+- Standard LSB PSNR: ~51 dB
+- DP-Enhanced PSNR: ~51 dB (imperceptible)
+- Improvement: ~90-95% detectability reduction
 
 ---
 
@@ -502,7 +514,11 @@ python gui.py
 #### Compare Original vs Stego
 - Select both original and stego images
 - Click "Compare Images"
-- View statistical differences and PSNR metrics
+- View comprehensive comparison report including:
+  - Statistical differences (deviation change)
+  - Visual quality metrics (PSNR, MSE)
+  - Pixel-level changes
+  - Effectiveness rating (EXCELLENT/GOOD/FAIR/POOR)
 
 ---
 
@@ -652,21 +668,26 @@ python main.py
 1. Launch application
 2. Navigate to **"Testing Lab"** tab
 3. Configure parameters:
-   - **Image Size:** 256×256 (smaller = more visible epsilon effects)
+   - **Image Source:** Choose between:
+     - **Synthetic:** Generate random image using seed (reproducible)
+     - **Existing Image File:** Browse and select your own test image
+   - **Image Size:** 256×256 (for synthetic images; affects epsilon visibility)
    - **Test Message:** [Your message]
    - **Epsilon:** 0.5 (recommended starting point)
    - **Password:** TestPassword123
-   - **Random Seed:** 42 (for reproducibility)
-4. Click **"Run Complete Test"**
-5. Review comprehensive comparison report
+   - **Random Seed:** 42 (for reproducible synthetic images)
+4. If using existing image, click **"Browse Image for Test"** to select file
+5. Click **"Run Complete Test"**
+6. Review comprehensive comparison report
 
 **Output includes:**
-- Original image statistics
-- Standard LSB results (baseline)
-- DP-Enhanced LSB results
-- Side-by-side comparison
-- Improvement percentage
-- Effectiveness ratings
+- Original image statistics (LSB distribution, deviation)
+- Standard LSB results (baseline method)
+- DP-Enhanced LSB results (our method)
+- Side-by-side comparison with PSNR metrics
+- Visual quality assessment (MSE, PSNR for both methods)
+- Improvement percentage (detectability reduction)
+- Effectiveness ratings (EXCELLENT/GOOD/FAIR/POOR)
 
 ### 7.4 Manual Testing Workflow
 
@@ -688,7 +709,8 @@ python main.py
 3. **Analyze Results**
    - Use "Compare Images" in Analysis tab
    - Select original and stego images
-   - Review deviation change metric
+   - Review deviation change and PSNR metrics
+   - Assess visual quality and statistical detectability
 
 ---
 

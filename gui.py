@@ -436,6 +436,23 @@ class SteganographyApp:
         self.test_seed_var = tk.StringVar(value="42")
         ttk.Entry(seed_frame, textvariable=self.test_seed_var, width=15).pack(side='left')
         ttk.Label(seed_frame, text="(same seed = reproducible results)").pack(side='left', padx=(10, 0))
+
+        # Image source: synthetic or existing file
+        source_frame = ttk.Frame(config_frame)
+        source_frame.pack(fill='x', pady=5)
+        ttk.Label(source_frame, text="Image Source:").pack(side='left', padx=(0, 10))
+        self.test_image_source_var = tk.StringVar(value='synthetic')
+        ttk.Radiobutton(source_frame, text="Synthetic (use seed)", variable=self.test_image_source_var,
+                        value='synthetic').pack(side='left', padx=(0, 5))
+        ttk.Radiobutton(source_frame, text="Existing Image File", variable=self.test_image_source_var,
+                        value='file').pack(side='left', padx=(0, 5))
+
+        # File picker for existing image (disabled unless file selected at runtime)
+        file_frame = ttk.Frame(config_frame)
+        file_frame.pack(fill='x', pady=5)
+        ttk.Button(file_frame, text="Browse Image for Test", command=self.browse_test_image).pack(side='left')
+        self.test_image_label = ttk.Label(file_frame, text="No test image selected", foreground="gray")
+        self.test_image_label.pack(side='left', padx=5)
         
         # Run Test Button
         btn_frame = ttk.Frame(main_frame)
@@ -586,7 +603,27 @@ Version 1.0 - 2025
         
         if filepath:
             self.analysis_image_path = filepath
-            self.analysis_image_label.config(text=os.path.basename(filepath), foreground="black")
+            self.testing_results_text.insert(tk.END, f"Step 1: Determine original image (synthetic or provided file)\n")
+            if getattr(self, 'test_image_source_var', None) and self.test_image_source_var.get() == 'file' and getattr(self, 'test_image_path', None):
+                self.testing_results_text.insert(tk.END, f"Step 1: Using provided image file {os.path.basename(self.test_image_path)} as original...\n")
+                self.root.update()
+                original_source = 'file'
+                # copy path
+                original_path = self.test_image_path
+            else:
+                self.testing_results_text.insert(tk.END, f"Step 1: Generating synthetic image (seed={seed})...\n")
+                self.root.update()
+                original_source = 'synthetic'
+                generate_random_lsb_image(width, height, original_path, seed=seed)
+
+            # Analyze original
+            original_analysis = chi_square_attack(original_path, channel='all')
+
+            self.testing_results_text.insert(tk.END,
+                f"Original image: {os.path.basename(original_path)} ({original_source})\n"
+                f"  LSB Distribution: {original_analysis['lsb_0_percent']:.2f}% / {original_analysis['lsb_1_percent']:.2f}%\n"
+                f"  Deviation: {original_analysis['deviation_from_50_50']:.4f}%\n"
+                f"  Status: {original_analysis['verdict']}\n\n")
             
     def browse_original_for_comparison(self):
         """Browse original image for comparison"""
@@ -609,6 +646,16 @@ Version 1.0 - 2025
         if filepath:
             self.stego_comparison_path = filepath
             self.stego_comparison_label.config(text=os.path.basename(filepath), foreground="black")
+
+    def browse_test_image(self):
+        """Browse an existing image to use as the test original in the Testing Lab"""
+        filepath = filedialog.askopenfilename(
+            title="Select Image for Testing",
+            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp"), ("All files", "*.*")]
+        )
+        if filepath:
+            self.test_image_path = filepath
+            self.test_image_label.config(text=os.path.basename(filepath), foreground="black")
             
     def show_image_preview(self, image_path, label_widget, size=(300, 200)):
         """Display image preview in a label"""
@@ -1046,17 +1093,43 @@ This embedding: {visual['psnr']:.2f} dB - {visual['quality_rating']}
             standard_path = os.path.join(temp_dir, "test_standard_lsb.png")
             dp_path = os.path.join(temp_dir, "test_dp_lsb.png")
             
-            # Step 1: Generate random image with seed for reproducibility
-            self.testing_results_text.insert(tk.END, f"Step 1: Generating synthetic image (seed={seed})...\n")
-            self.root.update()
+            # Step 1: Get or generate the original image
+            image_source = self.test_image_source_var.get()
             
-            generate_random_lsb_image(width, height, original_path, seed=seed)
+            if image_source == 'file':
+                # Use existing image file
+                if not hasattr(self, 'test_image_path') or not self.test_image_path:
+                    messagebox.showerror("Error", "Please browse and select an image file for testing!")
+                    return
+                
+                self.testing_results_text.insert(tk.END, f"Step 1: Using existing image file...\n")
+                self.root.update()
+                
+                # Copy the selected image to temp location
+                from PIL import Image
+                img = Image.open(self.test_image_path)
+                img.save(original_path)
+                
+                # Get actual dimensions from image
+                width, height = img.size
+                
+                self.testing_results_text.insert(tk.END, 
+                    f"Loaded image: {os.path.basename(self.test_image_path)}\n"
+                    f"  Dimensions: {width}×{height} pixels\n")
+            else:
+                # Generate synthetic image
+                self.testing_results_text.insert(tk.END, f"Step 1: Generating synthetic image (seed={seed})...\n")
+                self.root.update()
+                
+                generate_random_lsb_image(width, height, original_path, seed=seed)
+                
+                self.testing_results_text.insert(tk.END, 
+                    f"Generated {width}×{height} image\n")
             
             # Analyze original
             original_analysis = chi_square_attack(original_path, channel='all')
             
             self.testing_results_text.insert(tk.END, 
-                f"Generated {width}×{height} image\n"
                 f"  LSB Distribution: {original_analysis['lsb_0_percent']:.2f}% / {original_analysis['lsb_1_percent']:.2f}%\n"
                 f"  Deviation: {original_analysis['deviation_from_50_50']:.4f}%\n"
                 f"  Status: {original_analysis['verdict']}\n\n")
@@ -1068,13 +1141,15 @@ This embedding: {visual['psnr']:.2f} dB - {visual['quality_rating']}
             
             standard_result = embed_standard_lsb(original_path, message, standard_path)
             standard_analysis = chi_square_attack(standard_path, channel='all')
-            
+            visual_standard = calculate_visual_difference(original_path, standard_path)
+
             self.testing_results_text.insert(tk.END,
                 f"Embedded {len(message)} characters ({standard_result['message_length_bits']} bits)\n"
                 f"  Capacity Used: {standard_result['capacity_used_percent']:.2f}%\n"
                 f"  LSB Distribution: {standard_analysis['lsb_0_percent']:.2f}% / {standard_analysis['lsb_1_percent']:.2f}%\n"
                 f"  Deviation: {standard_analysis['deviation_from_50_50']:.4f}%\n"
-                f"  Status: {standard_analysis['verdict']}\n\n")
+                f"  Status: {standard_analysis['verdict']}\n"
+                f"  PSNR vs Original: {visual_standard['psnr']:.2f} dB\n\n")
             self.root.update()
             
             # Step 3: Embed with DP-Enhanced LSB
@@ -1083,7 +1158,8 @@ This embedding: {visual['psnr']:.2f} dB - {visual['quality_rating']}
             
             dp_result = embed(original_path, message, password, epsilon, dp_path)
             dp_analysis = chi_square_attack(dp_path, channel='all')
-            
+            visual_dp = calculate_visual_difference(original_path, dp_path)
+
             self.testing_results_text.insert(tk.END,
                 f"Embedded {len(message)} characters ({dp_result['message_length_bits']} bits)\n"
                 f"  Noise Added: {dp_result['noise_added']} bits\n"
@@ -1092,7 +1168,8 @@ This embedding: {visual['psnr']:.2f} dB - {visual['quality_rating']}
                 f"  Capacity Used: {dp_result['capacity_used_percent']:.2f}%\n"
                 f"  LSB Distribution: {dp_analysis['lsb_0_percent']:.2f}% / {dp_analysis['lsb_1_percent']:.2f}%\n"
                 f"  Deviation: {dp_analysis['deviation_from_50_50']:.4f}%\n"
-                f"  Status: {dp_analysis['verdict']}\n\n")
+                f"  Status: {dp_analysis['verdict']}\n"
+                f"  PSNR vs Original: {visual_dp['psnr']:.2f} dB\n\n")
             self.root.update()
             
             # Step 4: Compare both methods
@@ -1103,16 +1180,27 @@ This embedding: {visual['psnr']:.2f} dB - {visual['quality_rating']}
             standard_comparison = compare_images(original_path, standard_path)
             standard_deviation_change = standard_comparison['changes']['deviation_change']
             standard_effectiveness = standard_comparison['effectiveness']['rating']
+            # attach visual metrics
+            try:
+                standard_psnr = visual_standard.get('psnr', None)
+            except Exception:
+                standard_psnr = None
             
             # Compare DP-Enhanced LSB
             dp_comparison = compare_images(original_path, dp_path)
             dp_deviation_change = dp_comparison['changes']['deviation_change']
             dp_effectiveness = dp_comparison['effectiveness']['rating']
+            try:
+                dp_psnr = visual_dp.get('psnr', None)
+            except Exception:
+                dp_psnr = None
             
             # Calculate improvement
             improvement = ((standard_deviation_change - dp_deviation_change) / standard_deviation_change * 100) if standard_deviation_change > 0 else 0
             
             # Generate final report
+            image_source_desc = f"Synthetic Random (seed={seed})" if image_source == 'synthetic' else f"Existing Image: {os.path.basename(self.test_image_path)}"
+            
             results_text = f"""
 ════════════════════════════════════════════════════════════════════════
                     COMPREHENSIVE TEST RESULTS
@@ -1125,11 +1213,10 @@ TEST CONFIGURATION:
 • Capacity Used:     {standard_result['capacity_used_percent']:.2f}%
 • DP Epsilon:        {epsilon:.2f}
 • Password:          {password}
-• Random Seed:       {seed} (for reproducibility)
+• Image Source:      {image_source_desc}
 
-ORIGINAL IMAGE (Synthetic Random):
+ORIGINAL IMAGE ({image_source_desc}):
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-• Generated with seed {seed} - same seed always produces same image
 • LSB Distribution:  {original_analysis['lsb_0_percent']:.2f}% zeros / {original_analysis['lsb_1_percent']:.2f}% ones
 • Deviation:         {original_analysis['deviation_from_50_50']:.4f}% from 50/50
 • P-Value:           {original_analysis['p_value']:.6f}
@@ -1142,6 +1229,7 @@ After Embedding:
 • Deviation:         {standard_analysis['deviation_from_50_50']:.4f}% from 50/50
 • P-Value:           {standard_analysis['p_value']:.6f}
 • Status:            {standard_analysis['verdict']}
+• PSNR vs Original:  {f"{standard_psnr:.2f} dB" if standard_psnr is not None else 'N/A'}
 
 Detection Analysis:
 • Deviation Change:  {standard_deviation_change:.4f}% ⬅ KEY METRIC
@@ -1161,6 +1249,7 @@ After Embedding:
 • Deviation:         {dp_analysis['deviation_from_50_50']:.4f}% from 50/50
 • P-Value:           {dp_analysis['p_value']:.6f}
 • Status:            {dp_analysis['verdict']}
+• PSNR vs Original:  {f"{dp_psnr:.2f} dB" if dp_psnr is not None else 'N/A'}
 
 Detection Analysis:
 • Deviation Change:  {dp_deviation_change:.4f}% ⬅ KEY METRIC
